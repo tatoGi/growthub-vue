@@ -1,0 +1,26 @@
+export const agencies = [
+  {
+    slug: 'innovation-agency',
+    name: 'Innovation Agency',
+    description: 'ინოვაციური ბიზნესებისა და ტექნოლოგიური პროექტების მხარდამჭერი სააგენტო.',
+    text: 'სააგენტო მუშაობს ინოვაციური ეკოსისტემის გაძლიერებაზე, startup პროგრამებზე და მეწარმეების გაძლიერებაზე.',
+    address: 'თბილისი, უნივერსიტეტის ქ. 12',
+    phone: '+995 32 200 00 01',
+    email: 'info@innovation.example',
+    website: 'innovation.example',
+    social: ['Facebook', 'LinkedIn'],
+    photo: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&q=80&w=900',
+  },
+  {
+    slug: 'export-development-center',
+    name: 'Export Development Center',
+    description: 'ექსპორტზე ორიენტირებული ბიზნესებისთვის საკონსულტაციო და მენტორული პლატფორმა.',
+    text: 'ფოკუსირდება ბაზრის კვლევაზე, საერთაშორისო პარტნიორების მოძიებაზე და ექსპორტის readiness პროცესზე.',
+    address: 'ქუთაისი, აღმაშენებლის გამზ. 8',
+    phone: '+995 32 200 00 02',
+    email: 'hello@export.example',
+    website: 'export.example',
+    social: ['Facebook', 'Twitter', 'LinkedIn'],
+    photo: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=900',
+  },
+]

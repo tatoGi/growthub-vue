@@ -11,7 +11,7 @@
       
       <nav class="nav" :class="{ 'is-mobile': isMobileMenuOpen }">
         <div v-for="item in menuItems" :key="item.name" class="nav-item">
-          <a :href="item.link" class="nav-link" :class="{ 'active': currentHash === item.link }" @click="closeMobileMenu">
+          <a :href="item.link" class="nav-link" :class="{ 'active': isLinkActive(item) }" @click="closeMobileMenu">
             {{ item.name }}
             <svg v-if="item.children" class="chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -29,7 +29,7 @@
       </nav>
 
       <div class="header-actions">
-        <button type="button" class="login-btn">ავტორიზაცია</button>
+        <button type="button" class="login-btn" @click="openAuthModal">ავტორიზაცია</button>
         <button type="button" class="mobile-toggle" @click="toggleMobileMenu" aria-label="Toggle menu">
           <div class="hamburger">
             <span></span>
@@ -43,10 +43,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { inject, ref, onMounted, onUnmounted } from 'vue'
 
 const isScrolled = ref(false)
 const isMobileMenuOpen = ref(false)
+const openAuthModal = inject('openAuthModal', () => {})
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
@@ -72,6 +73,7 @@ const menuItems = [
   { name: 'მიმდინარე პროგრამები', link: '#programs' },
   { name: 'ღონისძიებები', link: '#events' },
   { name: 'ვიდეო ანიმაციები', link: '#animations' },
+  { name: 'სააგენტოები', link: '#agency' },
   { 
     name: 'ჩვენ შესახებ', 
     link: '#about',
@@ -95,6 +97,24 @@ const updateHash = () => {
   currentHash.value = window.location.hash || '#/'
 }
 
+const isLinkActive = (item) => {
+  if (currentHash.value === item.link) {
+    return true
+  }
+
+  if (currentHash.value.startsWith(`${item.link}/`)) {
+    return true
+  }
+
+  if (item.children?.length) {
+    return item.children.some((child) =>
+      currentHash.value === child.link || currentHash.value.startsWith(`${child.link}/`)
+    )
+  }
+
+  return false
+}
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   window.addEventListener('hashchange', updateHash)
@@ -106,7 +126,3 @@ onUnmounted(() => {
   document.body.style.overflow = ''
 })
 </script>
-
-
-
-

@@ -1,81 +1,102 @@
 <template>
-  <div class="site-shell">
-    <WebsiteHeader />
-    
-    <main class="main-content">
-      <!-- Breadcrumbs -->
-      <div class="breadcrumbs-bar">
-        <div class="container">
-          <ul class="breadcrumbs">
-            <li><a href="#/">მთავარი</a></li>
-            <li><span class="separator">/</span></li>
-            <li class="active">ვიდეო ანიმაციები</li>
-          </ul>
-        </div>
-      </div>
+  <InnerPageLayout
+    breadcrumb="ვიდეო გალერეა"
+    title="ვიდეო გალერეა"
+    description="Laravel-ის video-gallery-ის იდეაზე აწყობილი უფრო თანამედროვე გვერდი, სადაც მომხმარებელი ჯერ თემებს ხედავს და შემდეგ შედის დეტალურ ვიდეო გვერდზე."
+  >
+    <section class="content-section surface-section">
+      <div class="container">
+        <div class="video-gallery-hero">
+          <article class="video-gallery-copy">
+            <span class="eyebrow">Video Gallery</span>
+            <h2>მოკლე ვიზუალური გზამკვლევები ბიზნესის სხვადასხვა ეტაპისთვის</h2>
+            <p>
+              აქ ვკრებთ თემატურ ვიდეოებს, რომლებიც Laravel-ის ძველი `video-gallery` ბლოკის ფუნქციას ინარჩუნებს,
+              მაგრამ უკვე უფრო მკაფიო hierarchy-ით, კატეგორიებით და დეტალურ page flow-ით.
+            </p>
+            <div class="pill-list">
+              <span v-for="category in categories" :key="category" class="pill-item">{{ category }}</span>
+            </div>
+          </article>
 
-      <!-- Page Header -->
-      <section class="page-header">
-        <div class="container">
-          <div class="title-wrapper">
-            <div class="line"></div>
-            <h1>ვიდეო ანიმაციები</h1>
-            <div class="line"></div>
-          </div>
+          <article class="video-gallery-featured">
+            <img :src="featuredVideo.thumbnail" :alt="featuredVideo.title" />
+            <div class="video-gallery-featured-overlay">
+              <span>{{ featuredVideo.category }}</span>
+              <strong>{{ featuredVideo.title }}</strong>
+              <p>{{ featuredVideo.description }}</p>
+              <a :href="`#animations/${featuredVideo.slug}`" class="primary-action-link">ვიდეოს ნახვა</a>
+            </div>
+          </article>
         </div>
-      </section>
 
-      <!-- Videos Grid -->
-      <section class="videos-grid-section">
-        <div class="container">
-          <div class="grid">
-            <article v-for="video in allVideos" :key="video.id" class="video-card">
-              <div class="video-preview-wrapper">
-                <img :src="video.thumbnail" :alt="video.title" />
-                <div class="play-overlay">
-                  <div class="play-button">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
+        <div class="video-gallery-stats">
+          <article class="stat-box">
+            <strong>{{ videos.length }}</strong>
+            <span>აქტიური ვიდეო</span>
+          </article>
+          <article class="stat-box">
+            <strong>{{ categories.length }}</strong>
+            <span>თემატური კატეგორია</span>
+          </article>
+          <article class="stat-box">
+            <strong>{{ totalDuration }}</strong>
+            <span>ჯამური ხანგრძლივობა</span>
+          </article>
+        </div>
+
+        <div class="video-gallery-grid">
+          <article v-for="video in videos" :key="video.id" class="video-card video-card-modern">
+            <a :href="`#animations/${video.slug}`" class="video-preview-wrapper">
+              <img :src="video.thumbnail" :alt="video.title" />
+              <div class="play-overlay">
+                <div class="play-button">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
                 </div>
               </div>
-              <div class="video-info">
-                <h3>{{ video.title }}</h3>
-                <p>{{ video.description }}</p>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-    </main>
+              <span class="video-duration-chip">{{ video.duration }}</span>
+            </a>
 
-    <WebsiteFooter />
-  </div>
+            <div class="video-info">
+              <div class="video-card-meta">
+                <span>{{ video.category }}</span>
+                <span>{{ formatDate(video.date) }}</span>
+              </div>
+              <h3>{{ video.title }}</h3>
+              <p>{{ video.description }}</p>
+              <a :href="`#animations/${video.slug}`" class="feature-link">დეტალურად</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </InnerPageLayout>
 </template>
 
 <script setup>
-import WebsiteHeader from './home/WebsiteHeader.vue'
-import WebsiteFooter from './home/WebsiteFooter.vue'
+import { computed } from 'vue'
+import InnerPageLayout from './shared/InnerPageLayout.vue'
+import { videos } from '../../data/videos'
 
-const allVideos = [
-  {
-    id: 1,
-    title: 'როგორ დავიწყოთ ბიზნესი?',
-    description: 'ანიმაციური გზამკვლევი დამწყები მეწარმეებისთვის ბიზნესის რეგისტრაციის ეტაპებზე.',
-    thumbnail: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400'
-  },
-  {
-    id: 2,
-    title: 'სახელმწიფო პროგრამები 2024',
-    description: 'მოკლე მიმოხილვა ყველა იმ აქტიური პროგრამის შესახებ, რომელსაც სახელმწიფო სთავაზობს ბიზნესს.',
-    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400'
-  },
-  {
-    id: 3,
-    title: 'ექსპორტის ხელშეწყობა',
-    description: 'ანიმაცია ქართული პროდუქციის საექსპორტო პოტენციალის გაზრდის მექანიზმებზე.',
-    thumbnail: 'https://images.unsplash.com/photo-1544151462-c55f10adda3c?auto=format&fit=crop&q=80&w=400'
-  }
-]
+const featuredVideo = videos[0]
+
+const categories = computed(() => [...new Set(videos.map((video) => video.category))])
+
+const totalDuration = computed(() => {
+  const totalMinutes = videos.reduce((sum, video) => {
+    const [minutes, seconds] = video.duration.split(':').map(Number)
+    return sum + minutes + (seconds >= 30 ? 1 : 0)
+  }, 0)
+
+  return `${totalMinutes} წთ`
+})
+
+const formatDate = (value) =>
+  new Date(value).toLocaleDateString('ka-GE', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 </script>
