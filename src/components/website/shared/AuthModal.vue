@@ -12,10 +12,6 @@
           <aside class="auth-modal-aside">
             <span class="eyebrow">GrowthHub Access</span>
             <h2 id="auth-modal-title">პირადი სივრცე და რეგისტრაცია ერთიან modal flow-ში</h2>
-            <p>
-              Laravel-ის ძველი CRM login/register გვერდების სტრუქტურა აქ გადმოტანილია უფრო კომპაქტურ, თანამედროვე
-              და ერთი-click გამოცდილებაში.
-            </p>
 
             <div class="auth-modal-points">
               <div class="contact-point">ავტორიზაცია პირადი სივრცისთვის</div>
