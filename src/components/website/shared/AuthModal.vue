@@ -68,6 +68,15 @@
               </div>
 
               <button type="button" class="auth-text-link subtle" @click="loginView = 'recovery'">პაროლის აღდგენა</button>
+
+              <div class="auth-demo-section">
+                <span class="auth-demo-label">Demo წვდომა</span>
+                <div class="auth-demo-btns">
+                  <button type="button" class="auth-demo-btn" @click="demoLogin('user')">ბიზნეს მომხმარებელი</button>
+                  <button type="button" class="auth-demo-btn" @click="demoLogin('central')">ცენტრის თანამშრომელი</button>
+                  <button type="button" class="auth-demo-btn" @click="demoLogin('bank')">ბანკის წარმომადგენელი</button>
+                </div>
+              </div>
             </form>
 
             <form v-else-if="activeTab === 'login' && loginView === 'recovery'" class="auth-form" @submit.prevent="submitRecovery">
@@ -212,6 +221,8 @@
 
 <script setup>
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { useAuth } from '../../../composables/useAuth'
+import { crmRoleMeta } from '../../../data/crm'
 
 const props = defineProps({
   modelValue: {
@@ -221,6 +232,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const { login } = useAuth()
 
 const activeTab = ref('login')
 const loginView = ref('login')
@@ -270,7 +283,15 @@ const closeModal = () => {
 }
 
 const submitLogin = () => {
+  login('user')
   closeModal()
+  window.location.hash = crmRoleMeta.user.defaultPath
+}
+
+const demoLogin = (role) => {
+  login(role)
+  closeModal()
+  window.location.hash = crmRoleMeta[role].defaultPath
 }
 
 const submitRecovery = () => {

@@ -181,6 +181,26 @@ visual migration დასრულებულია.
 
 ანუ Laravel public frontend-ის ძირითადი view inventory უკვე გადმოტანილია Vue-ში თანამედროვე ვიზუალით.
 
+## CRM visual start
+
+CRM visual migration დაწყებულია ცალკე namespace-ით:
+
+- `#crm`
+- `#crm/user/*`
+- `#crm/central/*`
+- `#crm/bank/*`
+
+პირველი CRM ეტაპზე უკვე გაკეთებულია:
+
+- shared CRM shell
+- role switch: business / central / bank
+- bank profile view-ის თანამედროვე გადაყვანა
+- central navigation-ის თანამედროვე დაშლა
+
+CRM status ცალკე იწერება აქ:
+
+- `CRM_MIGRATION_STATUS.md`
+
 ## რაც დარჩენილია
 
 დარჩენილია მხოლოდ integration მიმართულება:

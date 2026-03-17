@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find C:UserspcDesktopworkspaceworkgrowthhubresourcesviewswebsitecrm -name *message* -o -name *inbox* -o -name *note*)"
+    ]
+  }
+}

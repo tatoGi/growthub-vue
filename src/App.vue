@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, provide } from 'vue'
+import { ref, onMounted, onUnmounted, computed, provide, watch } from 'vue'
+import { useAuth } from './composables/useAuth'
 import WebsiteHome from './components/website/WebsiteHome.vue'
 import ProgramsPage from './components/website/ProgramsPage.vue'
 import ProgramDetailPage from './components/website/ProgramDetailPage.vue'
@@ -26,9 +27,31 @@ import AboutProjectPage from './components/website/AboutProjectPage.vue'
 import AboutPartnersPage from './components/website/AboutPartnersPage.vue'
 import AboutFaqPage from './components/website/AboutFaqPage.vue'
 import AboutTeamPage from './components/website/AboutTeamPage.vue'
+import CrmPage from './components/crm/CrmPage.vue'
+import CrmBusinessPage from './components/crm/CrmBusinessPage.vue'
+import CrmMessagesPage from './components/crm/CrmMessagesPage.vue'
+import CrmCalendarPage from './components/crm/CrmCalendarPage.vue'
+import CrmDiagnosticPage from './components/crm/CrmDiagnosticPage.vue'
+import CrmCentralProfilePage from './components/crm/CrmCentralProfilePage.vue'
+import CrmCentralMembersPage from './components/crm/CrmCentralMembersPage.vue'
+import CrmCentralEmployeesPage from './components/crm/CrmCentralEmployeesPage.vue'
+import CrmCentralCompaniesPage from './components/crm/CrmCentralCompaniesPage.vue'
+import CrmCentralReportsPage from './components/crm/CrmCentralReportsPage.vue'
+import CrmCentralMaterialsPage from './components/crm/CrmCentralMaterialsPage.vue'
+import CrmCentralEventsPage from './components/crm/CrmCentralEventsPage.vue'
+import CrmCentralConsultingPage from './components/crm/CrmCentralConsultingPage.vue'
+import CrmCentralTrainingPage from './components/crm/CrmCentralTrainingPage.vue'
+import CrmCentralProjectsPage from './components/crm/CrmCentralProjectsPage.vue'
+import CrmBankProfilePage from './components/crm/CrmBankProfilePage.vue'
+import CrmUserEventsPage from './components/crm/CrmUserEventsPage.vue'
+import CrmUserMaterialsPage from './components/crm/CrmUserMaterialsPage.vue'
+import CrmUserPlanVisitPage from './components/crm/CrmUserPlanVisitPage.vue'
+import CrmChangepassPage from './components/crm/CrmChangepassPage.vue'
 
 const currentPath = ref(window.location.hash)
 const isAuthModalOpen = ref(false)
+
+const { auth } = useAuth()
 
 const updatePath = () => {
   currentPath.value = window.location.hash
@@ -39,6 +62,13 @@ const openAuthModal = () => {
 }
 
 provide('openAuthModal', openAuthModal)
+
+watch(currentPath, (path) => {
+  if (path.startsWith('#crm') && !auth.isLoggedIn) {
+    window.location.hash = '#/'
+    isAuthModalOpen.value = true
+  }
+})
 
 const currentProgramSlug = computed(() => {
   if (!currentPath.value?.startsWith('#programs/')) {
@@ -125,6 +155,26 @@ onUnmounted(() => {
 
 <template>
   <WebsiteHome v-if="currentPath === '#/' || currentPath === ''" />
+  <CrmBusinessPage v-else-if="currentPath === '#crm/user/business'" />
+  <CrmMessagesPage v-else-if="currentPath === '#crm/user/messages' || currentPath === '#crm/central/messages'" />
+  <CrmCalendarPage v-else-if="currentPath === '#crm/user/calendar' || currentPath === '#crm/central/calendar'" />
+  <CrmDiagnosticPage v-else-if="currentPath === '#crm/user/diagnostic' || currentPath === '#crm/central/diagnostic'" />
+  <CrmCentralProfilePage v-else-if="currentPath === '#crm/central/profile'" />
+  <CrmCentralMembersPage v-else-if="currentPath === '#crm/central/members'" />
+  <CrmCentralEmployeesPage v-else-if="currentPath === '#crm/central/employees'" />
+  <CrmCentralCompaniesPage v-else-if="currentPath === '#crm/central/companies'" />
+  <CrmCentralReportsPage v-else-if="currentPath === '#crm/central/reports'" />
+  <CrmCentralMaterialsPage v-else-if="currentPath === '#crm/central/materials'" />
+  <CrmCentralEventsPage v-else-if="currentPath === '#crm/central/events'" />
+  <CrmCentralConsultingPage v-else-if="currentPath === '#crm/central/consulting'" />
+  <CrmCentralTrainingPage v-else-if="currentPath === '#crm/central/training'" />
+  <CrmCentralProjectsPage v-else-if="currentPath === '#crm/central/projects'" />
+  <CrmBankProfilePage v-else-if="currentPath === '#crm/bank/profile'" />
+  <CrmUserEventsPage v-else-if="currentPath === '#crm/user/events'" />
+  <CrmUserMaterialsPage v-else-if="currentPath === '#crm/user/materials'" />
+  <CrmUserPlanVisitPage v-else-if="currentPath === '#crm/user/plan-visit'" />
+  <CrmChangepassPage v-else-if="currentPath === '#crm/user/changepass' || currentPath === '#crm/central/changepass' || currentPath === '#crm/bank/changepass'" />
+  <CrmPage v-else-if="currentPath.startsWith('#crm')" :path="currentPath" />
   <ProgramsPage v-else-if="currentPath === '#programs'" />
   <ProgramDetailPage v-else-if="currentPath.startsWith('#programs/')" :slug="currentProgramSlug" />
   <EventsPage v-else-if="currentPath === '#events'" />
