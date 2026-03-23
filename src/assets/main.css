@@ -368,10 +368,17 @@ a {
 }
 
 .user-nav-name {
+  display: none;
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (min-width: 1700px) {
+  .user-nav-name {
+    display: block;
+  }
 }
 
 .user-nav-dropdown {
@@ -7558,3 +7565,23 @@ a {
 .pv-hist-done      { background: #dcfce7; color: #15803d; }
 .pv-hist-upcoming  { background: #dbeafe; color: #1d4ed8; }
 .pv-hist-cancelled { background: #fee2e2; color: #b91c1c; }
+
+/* Auth form feedback */
+.auth-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: .55rem .85rem;
+  font-size: .85rem;
+  margin-bottom: .5rem;
+}
+.auth-success-msg {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: .55rem .85rem;
+  font-size: .85rem;
+  margin-bottom: .5rem;
+}

@@ -51,7 +51,7 @@ import CrmChangepassPage from './components/crm/CrmChangepassPage.vue'
 const currentPath = ref(window.location.hash)
 const isAuthModalOpen = ref(false)
 
-const { auth } = useAuth()
+const { auth, fetchMe } = useAuth()
 
 const updatePath = () => {
   currentPath.value = window.location.hash
@@ -146,6 +146,8 @@ const currentSearchQuery = computed(() => {
 
 onMounted(() => {
   window.addEventListener('hashchange', updatePath)
+  // Re-validate JWT on every page load so session stays fresh
+  fetchMe()
 })
 
 onUnmounted(() => {

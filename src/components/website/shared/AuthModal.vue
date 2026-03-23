@@ -56,8 +56,12 @@
                 <input id="auth-password" v-model="loginForm.password" type="password" placeholder="პაროლი" />
               </div>
 
+              <p v-if="formError" class="auth-error">{{ formError }}</p>
+
               <div class="auth-actions-row">
-                <button type="submit" class="submit-btn-premium">შესვლა</button>
+                <button type="submit" class="submit-btn-premium" :disabled="auth.loading">
+                  {{ auth.loading ? '...' : 'შესვლა' }}
+                </button>
                 <button type="button" class="auth-text-link" @click="activeTab = 'register'">
                   ანგარიშის შექმნა
                 </button>
@@ -68,9 +72,9 @@
               <div class="auth-demo-section">
                 <span class="auth-demo-label">Demo წვდომა</span>
                 <div class="auth-demo-btns">
-                  <button type="button" class="auth-demo-btn" @click="demoLogin('user')">ბიზნეს მომხმარებელი</button>
-                  <button type="button" class="auth-demo-btn" @click="demoLogin('central')">ცენტრის თანამშრომელი</button>
-                  <button type="button" class="auth-demo-btn" @click="demoLogin('bank')">ბანკის წარმომადგენელი</button>
+                  <button type="button" class="auth-demo-btn" @click="handleDemoLogin('user')">ბიზნეს მომხმარებელი</button>
+                  <button type="button" class="auth-demo-btn" @click="handleDemoLogin('central')">ცენტრის თანამშრომელი</button>
+                  <button type="button" class="auth-demo-btn" @click="handleDemoLogin('bank')">ბანკის წარმომადგენელი</button>
                 </div>
               </div>
             </form>
@@ -91,8 +95,13 @@
                 <input id="recovery-phone" v-model="recoveryForm.phoneNumber" type="text" inputmode="numeric" placeholder="577XXXXXX" />
               </div>
 
+              <p v-if="recoverySuccess" class="auth-success-msg">დროებითი პაროლი გამოგზავნილია</p>
+              <p v-if="formError" class="auth-error">{{ formError }}</p>
+
               <div class="auth-actions-row">
-                <button type="submit" class="submit-btn-premium">დროებითი პაროლის მიღება</button>
+                <button type="submit" class="submit-btn-premium" :disabled="auth.loading">
+                  {{ auth.loading ? '...' : 'დროებითი პაროლის მიღება' }}
+                </button>
                 <button type="button" class="auth-text-link" @click="loginView = 'login'">ავტორიზაციაზე დაბრუნება</button>
               </div>
             </form>
@@ -191,7 +200,11 @@
                   </span>
                 </label>
 
-                <button type="submit" class="submit-btn-premium">რეგისტრაცია</button>
+                <p v-if="formError" class="auth-error">{{ formError }}</p>
+
+                <button type="submit" class="submit-btn-premium" :disabled="auth.loading">
+                  {{ auth.loading ? '...' : 'რეგისტრაცია' }}
+                </button>
               </form>
             </div>
           </section>
@@ -229,12 +242,14 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { login } = useAuth()
+const { login, register, forgotPassword, demoLogin, auth } = useAuth()
 
 const activeTab = ref('login')
 const loginView = ref('login')
 const isTermsOpen = ref(false)
 const registrationSuccess = ref(false)
+const formError = ref('')
+const recoverySuccess = ref(false)
 
 const loginForm = reactive({
   email: '',
@@ -276,30 +291,68 @@ const regions = [
 const closeModal = () => {
   emit('update:modelValue', false)
   isTermsOpen.value = false
+  formError.value = ''
 }
 
-const submitLogin = () => {
-  login('user')
-  closeModal()
-  window.location.hash = crmRoleMeta.user.defaultPath
+const submitLogin = async () => {
+  formError.value = ''
+  try {
+    const user = await login(loginForm.email, loginForm.password)
+    closeModal()
+    const role = user?.role || 'user'
+    const dest = crmRoleMeta[role]?.defaultPath || crmRoleMeta.user.defaultPath
+    window.location.hash = dest
+  } catch {
+    formError.value = auth.error || 'შესვლა ვერ მოხერხდა'
+  }
 }
 
-const demoLogin = (role) => {
-  login(role)
+const handleDemoLogin = (role) => {
+  demoLogin(role)
   closeModal()
   window.location.hash = crmRoleMeta[role].defaultPath
 }
 
-const submitRecovery = () => {
-  loginView.value = 'login'
+const submitRecovery = async () => {
+  formError.value = ''
+  try {
+    await forgotPassword(recoveryForm.companyId, recoveryForm.phoneNumber)
+    recoverySuccess.value = true
+  } catch {
+    formError.value = auth.error || 'მოთხოვნა ვერ დამუშავდა'
+  }
 }
 
-const submitRegister = () => {
-  registrationSuccess.value = true
+const submitRegister = async () => {
+  formError.value = ''
+  if (registerForm.password !== registerForm.passwordConfirmation) {
+    formError.value = 'პაროლები არ ემთხვევა'
+    return
+  }
+  if (!registerForm.accepted) {
+    formError.value = 'გთხოვთ დაეთანხმოთ პირობებს'
+    return
+  }
+  try {
+    await register({
+      userType: registerForm.userType,
+      email: registerForm.email,
+      password: registerForm.password,
+      phone: `+995${registerForm.phone}`,
+      region: registerForm.region,
+      ...(registerForm.userType === 'individual'
+        ? { personalId: registerForm.personalId, birthYear: registerForm.birthYear }
+        : { companyId: registerForm.companyId }),
+    })
+    registrationSuccess.value = true
+  } catch {
+    formError.value = auth.error || 'რეგისტრაცია ვერ მოხერხდა'
+  }
 }
 
 const resetRegistration = () => {
   registrationSuccess.value = false
+  formError.value = ''
   activeTab.value = 'register'
 }
 
@@ -309,7 +362,6 @@ const onKeydown = (event) => {
       isTermsOpen.value = false
       return
     }
-
     closeModal()
   }
 }
@@ -321,6 +373,8 @@ watch(
     if (!isOpen) {
       isTermsOpen.value = false
       loginView.value = 'login'
+      formError.value = ''
+      recoverySuccess.value = false
     }
   }
 )

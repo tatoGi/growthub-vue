@@ -1,26 +1,136 @@
 import { reactive, readonly } from 'vue'
+import { authApi } from '../api/auth'
+
+// Restore session from localStorage on page refresh
+function _loadStoredUser() {
+  try {
+    const raw = localStorage.getItem('auth_user')
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
 
 const _state = reactive({
-  isLoggedIn: false,
-  user: null // { name: string, role: 'user' | 'central' | 'bank' }
+  isLoggedIn: !!localStorage.getItem('auth_token'),
+  user: _loadStoredUser(), // { id, name, email, role: 'user' | 'central' | 'bank' }
+  loading: false,
+  error: null,
 })
 
-const _roleLabels = {
-  user: 'ბიზნეს მომხმარებელი',
-  central: 'ცენტრის თანამშრომელი',
-  bank: 'ბანკის წარმომადგენელი'
+function _persist(token, user) {
+  localStorage.setItem('auth_token', token)
+  localStorage.setItem('auth_user', JSON.stringify(user))
+  _state.isLoggedIn = true
+  _state.user = user
+  _state.error = null
+}
+
+function _clear() {
+  localStorage.removeItem('auth_token')
+  localStorage.removeItem('auth_user')
+  _state.isLoggedIn = false
+  _state.user = null
 }
 
 export function useAuth() {
-  const login = (role) => {
+  // Real login — returns user on success, throws on failure
+  async function login(email, password) {
+    _state.loading = true
+    _state.error = null
+    try {
+      const { data } = await authApi.login(email, password)
+      // Expected NestJS response: { access_token: string, user: { id, name, email, role } }
+      _persist(data.access_token, data.user)
+      return data.user
+    } catch (err) {
+      _state.error = err.response?.data?.message || 'შესვლა ვერ მოხერხდა'
+      throw err
+    } finally {
+      _state.loading = false
+    }
+  }
+
+  // Real register
+  async function register(formData) {
+    _state.loading = true
+    _state.error = null
+    try {
+      const { data } = await authApi.register(formData)
+      // If NestJS auto-logs in after register and returns a token, persist it
+      if (data.access_token) {
+        _persist(data.access_token, data.user)
+      }
+      return data
+    } catch (err) {
+      _state.error = err.response?.data?.message || 'რეგისტრაცია ვერ მოხერხდა'
+      throw err
+    } finally {
+      _state.loading = false
+    }
+  }
+
+  // Forgot password
+  async function forgotPassword(companyId, phone) {
+    _state.loading = true
+    _state.error = null
+    try {
+      const { data } = await authApi.forgotPassword(companyId, phone)
+      return data
+    } catch (err) {
+      _state.error = err.response?.data?.message || 'მოთხოვნა ვერ დამუშავდა'
+      throw err
+    } finally {
+      _state.loading = false
+    }
+  }
+
+  // Logout
+  async function logout() {
+    try {
+      await authApi.logout()
+    } catch {
+      // silently ignore server errors on logout
+    } finally {
+      _clear()
+    }
+  }
+
+  // Refresh user from server (useful on app mount)
+  async function fetchMe() {
+    if (!localStorage.getItem('auth_token')) return
+    try {
+      const { data } = await authApi.me()
+      _state.user = data
+      _state.isLoggedIn = true
+      localStorage.setItem('auth_user', JSON.stringify(data))
+    } catch {
+      _clear()
+    }
+  }
+
+  // Demo / mock login — kept for development convenience
+  function demoLogin(role) {
+    const roleLabels = {
+      user: 'ბიზნეს მომხმარებელი',
+      central: 'ცენტრის თანამშრომელი',
+      bank: 'ბანკის წარმომადგენელი',
+    }
+    const fakeUser = { id: 0, name: roleLabels[role], email: 'demo@growthub.ge', role }
+    localStorage.setItem('auth_token', `demo_${role}`)
+    localStorage.setItem('auth_user', JSON.stringify(fakeUser))
     _state.isLoggedIn = true
-    _state.user = { name: _roleLabels[role], role }
+    _state.user = fakeUser
+    _state.error = null
   }
 
-  const logout = () => {
-    _state.isLoggedIn = false
-    _state.user = null
+  return {
+    auth: readonly(_state),
+    login,
+    register,
+    forgotPassword,
+    logout,
+    fetchMe,
+    demoLogin,
   }
-
-  return { auth: readonly(_state), login, logout }
 }
