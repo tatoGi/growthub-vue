@@ -40,9 +40,10 @@ export function useAuth() {
     _state.error = null
     try {
       const { data } = await authApi.login(email, password)
-      // Expected NestJS response: { access_token: string, user: { id, name, email, role } }
-      _persist(data.access_token, data.user)
-      return data.user
+      // Laravel response: { success, data: { access_token, user } }
+      const payload = data.data
+      _persist(payload.access_token, payload.user)
+      return payload.user
     } catch (err) {
       _state.error = err.response?.data?.message || 'შესვლა ვერ მოხერხდა'
       throw err
@@ -57,11 +58,12 @@ export function useAuth() {
     _state.error = null
     try {
       const { data } = await authApi.register(formData)
-      // If NestJS auto-logs in after register and returns a token, persist it
-      if (data.access_token) {
-        _persist(data.access_token, data.user)
+      // Laravel response: { success, data: { access_token, user } }
+      const payload = data.data
+      if (payload?.access_token) {
+        _persist(payload.access_token, payload.user)
       }
-      return data
+      return payload
     } catch (err) {
       _state.error = err.response?.data?.message || 'რეგისტრაცია ვერ მოხერხდა'
       throw err
@@ -76,7 +78,7 @@ export function useAuth() {
     _state.error = null
     try {
       const { data } = await authApi.forgotPassword(companyId, phone)
-      return data
+      return data.data
     } catch (err) {
       _state.error = err.response?.data?.message || 'მოთხოვნა ვერ დამუშავდა'
       throw err
@@ -101,9 +103,11 @@ export function useAuth() {
     if (!localStorage.getItem('auth_token')) return
     try {
       const { data } = await authApi.me()
-      _state.user = data
+      // Laravel response: { success, data: { id, name, email, role } }
+      const user = data.data
+      _state.user = user
       _state.isLoggedIn = true
-      localStorage.setItem('auth_user', JSON.stringify(data))
+      localStorage.setItem('auth_user', JSON.stringify(user))
     } catch {
       _clear()
     }
