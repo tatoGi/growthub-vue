@@ -30,15 +30,15 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import InnerPageLayout from './shared/InnerPageLayout.vue'
 import { programs } from '../../data/programs'
-import { events } from '../../data/events'
 import { videos } from '../../data/videos'
 import { partners } from '../../data/partners'
 import { teamMembers } from '../../data/team'
 import { agencies } from '../../data/agencies'
 import { textPages } from '../../data/pages'
+import { useEvents } from '../../composables/useEvents'
 
 const props = defineProps({
   query: {
@@ -48,6 +48,7 @@ const props = defineProps({
 })
 
 const localQuery = ref(props.query)
+const { events, loadEvents } = useEvents()
 
 watch(
   () => props.query,
@@ -56,7 +57,11 @@ watch(
   }
 )
 
-const searchableItems = [
+onMounted(() => {
+  loadEvents()
+})
+
+const searchableItems = computed(() => [
   ...programs.map((item) => ({
     type: 'პროგრამა',
     group: 'Programs',
@@ -65,7 +70,7 @@ const searchableItems = [
     description: item.description,
     link: `#programs/${item.slug}`,
   })),
-  ...events.map((item) => ({
+  ...events.value.map((item) => ({
     type: 'ღონისძიება',
     group: 'Events',
     slug: item.slug,
@@ -113,16 +118,16 @@ const searchableItems = [
     description: item.summary,
     link: `#page/${item.slug}`,
   })),
-]
+])
 
 const normalizedQuery = computed(() => props.query.trim().toLowerCase())
 
 const results = computed(() => {
   if (!normalizedQuery.value) {
-    return searchableItems.slice(0, 8)
+    return searchableItems.value.slice(0, 8)
   }
 
-  return searchableItems.filter((item) => {
+  return searchableItems.value.filter((item) => {
     const haystack = `${item.title} ${item.description} ${item.type} ${item.group}`.toLowerCase()
     return haystack.includes(normalizedQuery.value)
   })

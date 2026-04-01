@@ -10,18 +10,18 @@
       </div>
 
       <nav class="nav" :class="{ 'is-mobile': isMobileMenuOpen }">
-        <div v-for="item in menuItems" :key="item.name" class="nav-item">
-          <a :href="item.link" class="nav-link" :class="{ 'active': isLinkActive(item) }" @click="closeMobileMenu">
-            {{ item.name }}
-            <svg v-if="item.children" class="chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div v-for="item in mainMenu" :key="item.slug" class="nav-item">
+          <a :href="'#' + item.slug" class="nav-link" :class="{ 'active': isLinkActive(item) }" @click="closeMobileMenu">
+            {{ item.label }}
+            <svg v-if="item.children?.length" class="chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </a>
 
-          <div v-if="item.children" class="dropdown">
+          <div v-if="item.children?.length" class="dropdown">
             <div class="dropdown-inner">
-              <a v-for="child in item.children" :key="child.name" :href="child.link" class="dropdown-link" @click="closeMobileMenu">
-                {{ child.name }}
+              <a v-for="child in item.children" :key="child.slug" :href="'#' + child.slug" class="dropdown-link" @click="closeMobileMenu">
+                {{ child.label }}
               </a>
             </div>
           </div>
@@ -73,6 +73,7 @@
 <script setup>
 import { inject, ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuth } from '../../../composables/useAuth'
+import { useNavigation } from '../../../composables/useNavigation'
 import { crmNav } from '../../../data/crm'
 
 const isScrolled = ref(false)
@@ -81,6 +82,7 @@ const isUserMenuOpen = ref(false)
 const openAuthModal = inject('openAuthModal', () => {})
 
 const { auth, logout } = useAuth()
+const { mainMenu, loadNavigation } = useNavigation()
 
 const roleNavItems = computed(() => crmNav[auth.user?.role] ?? [])
 
@@ -108,33 +110,6 @@ const closeMobileMenu = () => {
   document.body.style.overflow = ''
 }
 
-const menuItems = [
-  {
-    name: 'ბიზნესის მხარდაჭერა',
-    link: '#support',
-    children: [
-      { name: 'ბიზნეს-უნარების გაუმჯობესება', link: '#support/skills' },
-      { name: 'საკონსულტაციო მომსახურება', link: '#support/consulting' },
-      { name: 'ინფორმაციით უზრუნველყოფა', link: '#support/info' }
-    ]
-  },
-  { name: 'მიმდინარე პროგრამები', link: '#programs' },
-  { name: 'ღონისძიებები', link: '#events' },
-  { name: 'ვიდეო ანიმაციები', link: '#animations' },
-  { name: 'სააგენტოები', link: '#agency' },
-  {
-    name: 'ჩვენ შესახებ',
-    link: '#about',
-    children: [
-      { name: 'პროექტის შესახებ', link: '#about/project' },
-      { name: 'პარტნიორი ორგანიზაციები', link: '#about/partners' },
-      { name: 'ხშირად დასმული კითხვები', link: '#about/faq' },
-      { name: 'ჩვენი გუნდი', link: '#about/team' }
-    ]
-  },
-  { name: 'დაგვიკავშირდი', link: '#contact' },
-]
-
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 20
 }
@@ -146,18 +121,21 @@ const updateHash = () => {
 }
 
 const isLinkActive = (item) => {
-  if (currentHash.value === item.link) {
+  const link = '#' + item.slug
+
+  if (currentHash.value === link) {
     return true
   }
 
-  if (currentHash.value.startsWith(`${item.link}/`)) {
+  if (currentHash.value.startsWith(`${link}/`)) {
     return true
   }
 
   if (item.children?.length) {
-    return item.children.some((child) =>
-      currentHash.value === child.link || currentHash.value.startsWith(`${child.link}/`)
-    )
+    return item.children.some((child) => {
+      const childLink = '#' + child.slug
+      return currentHash.value === childLink || currentHash.value.startsWith(`${childLink}/`)
+    })
   }
 
   return false
@@ -173,6 +151,7 @@ onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   window.addEventListener('hashchange', updateHash)
   document.addEventListener('click', onClickOutside)
+  loadNavigation()
 })
 
 onUnmounted(() => {

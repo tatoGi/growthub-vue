@@ -8,7 +8,7 @@
       <div class="container">
         <div v-if="agency" class="agency-detail-layout">
           <article class="detail-card">
-            <img class="agency-detail-image" :src="agency.photo" :alt="agency.name" />
+            <img v-if="agency.photo" class="agency-detail-image" :src="agency.photo" :alt="agency.name" />
             <h3>{{ agency.name }}</h3>
             <p>{{ agency.text }}</p>
           </article>

@@ -2,25 +2,25 @@
   <InnerPageLayout
     :breadcrumb="event ? `${event.title} / რეგისტრაცია` : 'რეგისტრაცია'"
     :title="event ? `${event.title} / რეგისტრაცია` : 'რეგისტრაცია ვერ მოიძებნა'"
-    :description="event ? 'Laravel CRM event registration flow-ის ვიზუალური Vue ვერსია.' : 'მითითებული ღონისძიება ამ დროისთვის ხელმისაწვდომი არ არის.'"
+    :description="event ? 'რეგისტრაციის გვერდი იტვირთება CMS ღონისძიების მონაცემებით.' : 'მითითებული ღონისძიება ამ დროისთვის ხელმისაწვდომი არ არის.'"
   >
     <section class="content-section surface-section">
       <div class="container">
         <div v-if="event && !submitted" class="event-registration-layout">
           <article class="detail-card">
-            <span class="program-detail-tag">{{ event.type }}</span>
+            <span v-if="event.type" class="program-detail-tag">{{ event.type }}</span>
             <h3>{{ event.title }}</h3>
             <p>{{ event.description }}</p>
             <div class="meta-stack">
-              <div class="meta-row">
+              <div v-if="event.location" class="meta-row">
                 <span>ლოკაცია</span>
                 <strong>{{ event.location }}</strong>
               </div>
-              <div class="meta-row">
+              <div v-if="event.dateLabel" class="meta-row">
                 <span>თარიღი</span>
                 <strong>{{ event.dateLabel }}</strong>
               </div>
-              <div class="meta-row">
+              <div v-if="event.type" class="meta-row">
                 <span>ფორმატი</span>
                 <strong>{{ event.type }}</strong>
               </div>
@@ -94,9 +94,9 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import InnerPageLayout from './shared/InnerPageLayout.vue'
-import { findEventBySlug } from '../../data/events'
+import { useEvents } from '../../composables/useEvents'
 
 const props = defineProps({
   slug: {
@@ -105,7 +105,19 @@ const props = defineProps({
   },
 })
 
-const event = computed(() => findEventBySlug(props.slug))
+const { eventDetails, loadEvent } = useEvents()
+
+watch(
+  () => props.slug,
+  (slug) => {
+    if (slug) {
+      loadEvent(slug)
+    }
+  },
+  { immediate: true },
+)
+
+const event = computed(() => eventDetails[props.slug] ?? null)
 const submitted = ref(false)
 
 const form = reactive({

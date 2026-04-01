@@ -4,7 +4,6 @@
     <main class="main-content">
       <HeroSearch />
       <ProgramsSection />
-      <AboutSection />
       <InfoSection />
     </main>
     <WebsiteFooter />
@@ -12,12 +11,19 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import HeroSearch from './home/HeroSearch.vue'
 import InfoSection from './home/InfoSection.vue'
 import ProgramsSection from './home/ProgramsSection.vue'
-import AboutSection from './home/AboutSection.vue'
 import WebsiteFooter from './home/WebsiteFooter.vue'
 import WebsiteHeader from './home/WebsiteHeader.vue'
+import { useHome } from '../../composables/useHome'
+
+const { loadHome } = useHome()
+
+onMounted(() => {
+  loadHome()
+})
 </script>
 
 

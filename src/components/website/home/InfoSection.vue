@@ -1,14 +1,11 @@
-﻿<template>
+<template>
   <section class="cta-section fade-in-up">
     <div class="container">
       <div class="cta-card">
         <div class="cta-bg-shape"></div>
         <div class="cta-content">
-          <h2>გჭირდებათ დეტალური კონსულტაცია?</h2>
-          <p>
-            გამოგზავნე მოთხოვნა და ჩვენი გუნდის გამოცდილი ექსპერტები დაგიკავშირდებიან,
-            რათა დაგეხმარონ ბიზნესის განვითარების სწორი სტრატეგიის შერჩევაში.
-          </p>
+          <h2>{{ cta.title }}</h2>
+          <p>{{ cta.text }}</p>
         </div>
         <div class="cta-action">
           <button type="button" class="action-btn">
@@ -21,4 +18,8 @@
   </section>
 </template>
 
+<script setup>
+import { useHome } from '../../../composables/useHome'
 
+const { cta } = useHome()
+</script>

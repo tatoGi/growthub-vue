@@ -7,7 +7,7 @@
     <section class="content-section surface-section">
       <div class="container">
         <div v-if="partner" class="project-story-layout">
-          <article class="project-story-media">
+          <article v-if="partner.photo" class="project-story-media">
             <img :src="partner.photo" :alt="partner.name" />
           </article>
           <article class="project-story-copy">
@@ -19,7 +19,7 @@
         </div>
 
         <div v-if="partner" class="partner-gallery-grid">
-          <article v-for="image in partner.gallery" :key="image" class="rich-card">
+          <article v-for="image in partner.gallery.filter(Boolean)" :key="image" class="rich-card">
             <img class="gallery-thumb" :src="image" :alt="partner.name" />
           </article>
         </div>

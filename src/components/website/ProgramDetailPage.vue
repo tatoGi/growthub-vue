@@ -8,7 +8,7 @@
     <section class="content-section">
       <div class="container">
         <div class="program-detail-hero">
-          <div class="program-detail-media">
+          <div v-if="program.image" class="program-detail-media">
             <img :src="program.image" :alt="program.name" />
           </div>
 

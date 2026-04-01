@@ -8,7 +8,7 @@
       <div class="container">
         <div v-if="member" class="team-detail-layout">
           <article class="detail-card">
-            <img class="team-detail-image" :src="member.photo" :alt="member.name" />
+            <img v-if="member.photo" class="team-detail-image" :src="member.photo" :alt="member.name" />
           </article>
           <article class="detail-card">
             <div class="team-avatar large">{{ member.initials }}</div>

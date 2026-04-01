@@ -1,18 +1,22 @@
 <template>
   <section class="hero-section">
-    <div class="hero-bg"></div>
+    <div class="hero-bg" :style="hero.bg_image ? { backgroundImage: `url(${hero.bg_image})` } : {}"></div>
     <div class="hero-overlay"></div>
 
     <div class="container">
       <div class="content fade-in-up">
-        <div class="badge">
+        <div v-if="hero.badge" class="badge">
           <span class="badge-dot"></span>
-          დაიწყე ბიზნესი დღეს
+          <span class="hero-copy-stack hero-copy-stack--badge">
+            <span class="hero-copy-primary">{{ hero.badge }}</span>
+          </span>
         </div>
 
-        <h1>აქციე იდეა წარმატებულ ბიზნესად</h1>
+        <h1>
+          <span class="hero-copy-primary">{{ hero.title }}</span>
+        </h1>
         <p class="description">
-          აღმოაჩინე სახელმწიფო და კერძო პროგრამები, რომლებიც დაგეხმარება ბიზნესის დაწყებასა და განვითარებაში.
+          <span class="hero-copy-primary">{{ hero.description }}</span>
         </p>
 
         <div class="search-container">
@@ -26,12 +30,14 @@
             </button>
           </form>
 
-          <div class="quick-tags">
+          <div v-if="hero.quick_tags?.length" class="quick-tags">
             <span class="tag-label">ხშირად ძებნადი:</span>
             <div class="tags-list">
-              <a href="#search?q=%E1%83%9B%E1%83%98%E1%83%99%E1%83%A0%E1%83%9D%E1%83%92%E1%83%A0%E1%83%90%E1%83%9C%E1%83%A2%E1%83%98">#მიკროგრანტი</a>
-              <a href="#search?q=%E1%83%91%E1%83%98%E1%83%96%E1%83%9C%E1%83%94%E1%83%A1%E1%83%98%E1%83%A1%20%E1%83%9B%E1%83%AE%E1%83%90%E1%83%A0%E1%83%93%E1%83%90%E1%83%AD%E1%83%94%E1%83%A0%E1%83%90">#ბიზნესის მხარდაჭერა</a>
-              <a href="#search?q=%E1%83%94%E1%83%A5%E1%83%A1%E1%83%9E%E1%83%9D%E1%83%A0%E1%83%A2%E1%83%98">#ექსპორტი</a>
+              <a
+                v-for="tag in hero.quick_tags"
+                :key="tag"
+                :href="`#search?q=${encodeURIComponent(tag.replace(/^#/, ''))}`"
+              >{{ tag }}</a>
             </div>
           </div>
         </div>
@@ -42,7 +48,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useHome } from '../../../composables/useHome'
 
+const { hero } = useHome()
 const query = ref('')
 
 const submitSearch = () => {

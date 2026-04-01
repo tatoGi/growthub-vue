@@ -9,11 +9,12 @@
       <div class="container">
         <div class="event-detail-layout">
           <div class="event-detail-main">
-            <img :src="event.image" :alt="event.title" class="event-detail-image" />
+            <img v-if="event.image" :src="event.image" :alt="event.title" class="event-detail-image" />
 
             <div class="detail-card">
               <h3>ღონისძიების აღწერა</h3>
-              <p>{{ event.fullDescription }}</p>
+              <div v-if="event.body_html" v-html="event.body_html"></div>
+              <p v-else>{{ event.fullDescription }}</p>
             </div>
 
             <div class="detail-card" v-if="event.attachments.length">
@@ -28,15 +29,15 @@
             <div class="detail-card">
               <h3>ღონისძიების ინფორმაცია</h3>
               <div class="meta-stack">
-                <div class="meta-row">
+                <div v-if="event.type" class="meta-row">
                   <span>ტიპი</span>
                   <strong>{{ event.type }}</strong>
                 </div>
-                <div class="meta-row">
+                <div v-if="event.location" class="meta-row">
                   <span>ლოკაცია</span>
                   <strong>{{ event.location }}</strong>
                 </div>
-                <div class="meta-row">
+                <div v-if="event.dateLabel" class="meta-row">
                   <span>თარიღი</span>
                   <strong>{{ event.dateLabel }}</strong>
                 </div>
@@ -50,10 +51,10 @@
   </InnerPageLayout>
 
   <InnerPageLayout
-    v-else
+    v-else-if="!isPending"
     breadcrumb="ღონისძიება ვერ მოიძებნა"
     title="ღონისძიება ვერ მოიძებნა"
-    description="მითითებული ღონისძიება ამ mock ვერსიაში არ არსებობს."
+    description="მითითებული ღონისძიება ამ დროისთვის ვერ მოიძებნა."
   >
     <section class="content-section">
       <div class="container narrow-copy">
@@ -65,12 +66,28 @@
       </div>
     </section>
   </InnerPageLayout>
+
+  <InnerPageLayout
+    v-else
+    breadcrumb="ღონისძიებები"
+    title="ღონისძიებები"
+    description="მონაცემები იტვირთება."
+  >
+    <section class="content-section">
+      <div class="container narrow-copy">
+        <div class="rich-card">
+          <h3>ღონისძიება იტვირთება</h3>
+          <p>მონაცემები იტვირთება CMS-იდან.</p>
+        </div>
+      </div>
+    </section>
+  </InnerPageLayout>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import InnerPageLayout from './shared/InnerPageLayout.vue'
-import { findEventBySlug } from '../../data/events'
+import { useEvents } from '../../composables/useEvents'
 
 const props = defineProps({
   slug: {
@@ -79,5 +96,18 @@ const props = defineProps({
   },
 })
 
-const event = computed(() => findEventBySlug(props.slug))
+const { eventDetails, detailPending, loadEvent } = useEvents()
+
+watch(
+  () => props.slug,
+  (slug) => {
+    if (slug) {
+      loadEvent(slug)
+    }
+  },
+  { immediate: true },
+)
+
+const event = computed(() => eventDetails[props.slug] ?? null)
+const isPending = computed(() => Boolean(props.slug) && Boolean(detailPending[props.slug]) && !Object.prototype.hasOwnProperty.call(eventDetails, props.slug))
 </script>

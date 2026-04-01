@@ -1,5 +1,7 @@
 <script setup>
-import { programs } from '../../../data/programs'
+import { useHome } from '../../../composables/useHome'
+
+const { programs } = useHome()
 </script>
 
 <template>
@@ -16,7 +18,7 @@ import { programs } from '../../../data/programs'
 
       <div class="grid">
         <article v-for="program in programs" :key="program.id" class="program-card">
-          <div class="card-image-wrapper">
+          <div v-if="program.image" class="card-image-wrapper">
             <div class="card-image">
               <img :src="program.image" :alt="program.name" loading="lazy" />
               <div class="image-overlay"></div>
