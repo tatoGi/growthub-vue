@@ -69,6 +69,36 @@ watch(currentPath, (path) => {
 })
 
 
+const currentProgramSlug = computed(() => {
+  const m = (currentPath.value || '').match(/^#programs\/(.+)/)
+  return m ? decodeHashValue(m[1]) : ''
+})
+
+const currentEventSlug = computed(() => {
+  const m = (currentPath.value || '').match(/^#events\/([^/]+)/)
+  return m ? decodeHashValue(m[1]) : ''
+})
+
+const currentAnimationSlug = computed(() => {
+  const m = (currentPath.value || '').match(/^#animations\/(.+)/)
+  return m ? decodeHashValue(m[1]) : ''
+})
+
+const currentAgencySlug = computed(() => {
+  const m = (currentPath.value || '').match(/^#agency\/(.+)/)
+  return m ? decodeHashValue(m[1]) : ''
+})
+
+const currentPartnerSlug = computed(() => {
+  const m = (currentPath.value || '').match(/^#about\/partners\/(.+)/)
+  return m ? decodeHashValue(m[1]) : ''
+})
+
+const currentTeamSlug = computed(() => {
+  const m = (currentPath.value || '').match(/^#about\/team\/(.+)/)
+  return m ? decodeHashValue(m[1]) : ''
+})
+
 const currentDynamicSlug = computed(() => {
   const hashPath = (currentPath.value || '')
     .replace(/^#/, '')

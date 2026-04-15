@@ -1,5 +1,4 @@
 import { readonly, reactive } from 'vue'
-import http from '../api/http'
 
 const _pages = reactive({})
 const _pending = reactive({})
@@ -13,10 +12,20 @@ export function useSectionPage() {
     _pending[slug] = true
 
     try {
-      const { data } = await http.get(`/website/sections/${encodeURI(slug)}`, { params: { locale } })
-      _pages[slug] = data?.data ?? null
-    } catch {
-      _pages[slug] = null
+      // Mock page data for any requested section slug
+      await new Promise(resolve => setTimeout(resolve, 300))
+      _pages[slug] = {
+        title: 'Mock Section Page',
+        slug: slug,
+        blocks: [
+          {
+            type: 'text',
+            data: {
+              content: `<h2>This is a static mock for section: ${slug}</h2><p>Since the app is fully static now, all sections return this fallback content.</p>`
+            }
+          }
+        ]
+      }
     } finally {
       delete _pending[slug]
     }

@@ -1,5 +1,5 @@
 import { ref, readonly } from 'vue'
-import http from '../api/http'
+import { programs } from '../data/programs'
 
 const _hero = ref({
   badge: 'დაიწყე ბიზნესი დღეს',
@@ -9,7 +9,7 @@ const _hero = ref({
   bg_image: null,
 })
 
-const _programs = ref([])
+const _programs = ref(programs.slice(0, 3))
 
 const _about = ref({
   label: 'ჩვენი მისია',
@@ -27,25 +27,9 @@ const _cta = ref({
   text: 'გამოგზავნე მოთხოვნა და ჩვენი გუნდის გამოცდილი ექსპერტები დაგიკავშირდებიან, რათა დაგეხმარონ ბიზნესის განვითარების სწორი სტრატეგიის შერჩევაში.',
 })
 
-const _loaded = ref(false)
-
 export function useHome() {
-  async function loadHome(locale = 'ka') {
-    if (_loaded.value) return
-
-    try {
-      const { data } = await http.get('/website/home', { params: { locale } })
-      const d = data?.data
-
-      if (d?.hero) _hero.value = d.hero
-      if (d?.programs) _programs.value = d.programs
-      if (d?.about) _about.value = d.about
-      if (d?.cta) _cta.value = d.cta
-    } catch {
-      // keep defaults
-    } finally {
-      _loaded.value = true
-    }
+  function loadHome() {
+    // data already loaded from static source
   }
 
   return {

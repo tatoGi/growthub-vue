@@ -1,5 +1,4 @@
 import { reactive, readonly } from 'vue'
-import { authApi } from '../api/auth'
 
 // Restore session from localStorage on page refresh
 function _loadStoredUser() {
@@ -35,17 +34,22 @@ function _clear() {
 
 export function useAuth() {
   // Real login — returns user on success, throws on failure
+  // Mock login — returns mock user on success automatically
   async function login(email, password) {
     _state.loading = true
     _state.error = null
     try {
-      const { data } = await authApi.login(email, password)
-      // Laravel response: { success, data: { access_token, user } }
-      const payload = data.data
-      _persist(payload.access_token, payload.user)
-      return payload.user
+      await new Promise(resolve => setTimeout(resolve, 800))
+      const fakeUser = {
+        id: 1,
+        name: 'Demo User',
+        email: email || 'demo@growthub.ge',
+        role: 'user'
+      }
+      _persist('demo_token_123', fakeUser)
+      return fakeUser
     } catch (err) {
-      _state.error = err.response?.data?.message || 'შესვლა ვერ მოხერხდა'
+      _state.error = 'შესვლა ვერ მოხერხდა'
       throw err
     } finally {
       _state.loading = false
@@ -53,19 +57,22 @@ export function useAuth() {
   }
 
   // Real register
+  // Mock register
   async function register(formData) {
     _state.loading = true
     _state.error = null
     try {
-      const { data } = await authApi.register(formData)
-      // Laravel response: { success, data: { access_token, user } }
-      const payload = data.data
-      if (payload?.access_token) {
-        _persist(payload.access_token, payload.user)
+      await new Promise(resolve => setTimeout(resolve, 800))
+      const fakeUser = {
+        id: 2,
+        name: 'New User',
+        email: formData.email,
+        role: 'user'
       }
-      return payload
+      _persist('demo_token_new', fakeUser)
+      return { user: fakeUser, access_token: 'demo_token_new' }
     } catch (err) {
-      _state.error = err.response?.data?.message || 'რეგისტრაცია ვერ მოხერხდა'
+      _state.error = 'რეგისტრაცია ვერ მოხერხდა'
       throw err
     } finally {
       _state.loading = false
@@ -73,14 +80,15 @@ export function useAuth() {
   }
 
   // Forgot password
+  // Mock forgot password
   async function forgotPassword(companyId, phone) {
     _state.loading = true
     _state.error = null
     try {
-      const { data } = await authApi.forgotPassword(companyId, phone)
-      return data.data
+      await new Promise(resolve => setTimeout(resolve, 800))
+      return { message: 'Success' }
     } catch (err) {
-      _state.error = err.response?.data?.message || 'მოთხოვნა ვერ დამუშავდა'
+      _state.error = 'მოთხოვნა ვერ დამუშავდა'
       throw err
     } finally {
       _state.loading = false
@@ -88,26 +96,29 @@ export function useAuth() {
   }
 
   // Logout
+  // Mock logout
   async function logout() {
     try {
-      await authApi.logout()
+      await new Promise(resolve => setTimeout(resolve, 300))
     } catch {
-      // silently ignore server errors on logout
+      // ignore
     } finally {
       _clear()
     }
   }
 
   // Refresh user from server (useful on app mount)
+  // Refresh user from local storage
   async function fetchMe() {
     if (!localStorage.getItem('auth_token')) return
     try {
-      const { data } = await authApi.me()
-      // Laravel response: { success, data: { id, name, email, role } }
-      const user = data.data
-      _state.user = user
-      _state.isLoggedIn = true
-      localStorage.setItem('auth_user', JSON.stringify(user))
+      const stored = _loadStoredUser()
+      if (stored) {
+        _state.user = stored
+        _state.isLoggedIn = true
+      } else {
+        _clear()
+      }
     } catch {
       _clear()
     }

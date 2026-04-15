@@ -34,7 +34,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import InnerPageLayout from './shared/InnerPageLayout.vue'
-import http from '../../api/http'
 
 const agencies = ref([])
 const loading = ref(false)
@@ -42,8 +41,16 @@ const loading = ref(false)
 onMounted(async () => {
   loading.value = true
   try {
-    const { data } = await http.get('/website/agencies')
-    agencies.value = data?.data ?? []
+    await new Promise(resolve => setTimeout(resolve, 300))
+    agencies.value = [
+      {
+        slug: 'mock-agency-1',
+        name: 'Mock სააგენტო',
+        description: 'ეს არის დროებითი მონაცემები ლოკალური რეჟიმისთვის.',
+        address: 'თბილისი',
+        phone: '555 123 456'
+      }
+    ]
   } finally {
     loading.value = false
   }

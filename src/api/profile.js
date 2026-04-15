@@ -1,22 +1,22 @@
-import http from './http'
-
+// Mock API instead of HTTP
 export const profileApi = {
-  get() {
-    return http.get('/crm/profile')
+  async get() {
+    await new Promise(resolve => setTimeout(resolve, 300))
+    return { data: { data: { name: 'Demo User', phone: '555123456', relationship: 'Manager' } } }
   },
 
-  updateContact(data) {
-    // data: { name, phone, relationship }
-    return http.put('/crm/profile/contact', data)
+  async updateContact(data) {
+    await new Promise(resolve => setTimeout(resolve, 300))
+    return { data: { message: 'Success' } }
   },
 
-  updatePassword(data) {
-    // data: { current_password, password, password_confirmation }
-    return http.put('/crm/profile/password', data)
+  async updatePassword(data) {
+    await new Promise(resolve => setTimeout(resolve, 300))
+    return { data: { message: 'Success' } }
   },
 
-  updateBank(data) {
-    // data: { company_name, id_code, website, contact_first, contact_last, position, phone, email }
-    return http.put('/crm/profile/bank', data)
+  async updateBank(data) {
+    await new Promise(resolve => setTimeout(resolve, 300))
+    return { data: { message: 'Success' } }
   },
 }
